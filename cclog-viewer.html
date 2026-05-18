@@ -607,7 +607,14 @@ function renderLog(activeTabs) {
 function downloadLog() {
   const uid = 'cclog_' + Date.now();
 
-  const msgsJson = JSON.stringify(allMsgs.map(m => ({
+  // 현재 활성 탭 수집
+  const chips = document.querySelectorAll('#tab-filter .tab-chip[data-tab]:not([data-tab="__all__"])');
+  const activeTabs = new Set([...chips].filter(c => c.classList.contains('on')).map(c => c.dataset.tab));
+
+  // 활성 탭만 필터링
+  const filtered = allMsgs.filter(m => m.isSystem || activeTabs.size === 0 || activeTabs.has(m.tabId));
+
+  const msgsJson = JSON.stringify(filtered.map(m => ({
     tabId:m.tabId, tabName:m.tabName, name:m.name, text:m.text,
     color:m.color, iconUrl:m.iconUrl, standing:m.standing,
     roll:m.roll, isSystem:m.isSystem
@@ -674,7 +681,7 @@ function downloadLog() {
 <\/script>
 </div>`;
 
-  const blob = new Blob([snippet], { type: 'text/html;charset=utf-8' });
+  const blob = new Blob([snippet], { 입력: 'text/html;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'ccfolia_log.html';
@@ -690,7 +697,7 @@ $('fetch-btn').addEventListener('click', () => {
 $('room-input').addEventListener('keydown', e => { if (e.key==='Enter') $('fetch-btn').click(); });
 $('file-btn').addEventListener('click', () => $('file-input').click());
 $('file-input').addEventListener('change', e => {
-  const file = e.target.files[0]; if (!file) return;
+  const file = e.target.파일[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = ev => parseFile(ev.target.result, file.name);
   reader.readAsText(file, 'utf-8');
